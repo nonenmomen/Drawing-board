@@ -11,17 +11,22 @@ cap.set(3, widthCam)
 cap.set(4, heightCam)
 
 handdetect = hd.handDetector(detection_confident=0.8)
-drawingcolor = (0, 0, 0)
+drawingcolor = (0, 0, 0) #цвет, которым рисуем
 xp = 0
 yp = 0
 brushthickness = 10
+#толщина кисти для рисования цветом
 eraserthickness = 50
+#толщина стёрки
 canvasimg = np.zeros((720, 1280, 3), np.uint8)
+#сетка для последующего вывода(далее в программе)
+
 
 while True:
 
     check, frame = cap.read()
     frame = cv2.flip(frame, 1)
+    #изображение
     cv2.rectangle(frame, (10, 10), (100, 100), (0, 255, 0), cv2.FILLED)
     cv2.rectangle(frame, (120, 10), (210, 100), (0, 255, 255), cv2.FILLED)
     cv2.rectangle(frame, (230, 10), (320, 100), (255, 255, 0), cv2.FILLED)
@@ -36,10 +41,10 @@ while True:
     cv2.rectangle(frame, (1000, 10), (1090, 100), (80, 80, 230), cv2.FILLED)
     cv2.rectangle(frame, (1110, 10), (1240, 100), (0, 0, 0), cv2.FILLED)
     cv2.putText(frame, "Eraser", (1120, 60), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-
+    #бары с цветами и стёркой
     frame = handdetect.findhands(frame, draw_landmark=True)
     lmlist = handdetect.gethandlocation(frame, draw_landmark=False)
-
+    #находим ручки
     if len(lmlist) != 0:
 
         x1, y1 = lmlist[8][1:]
@@ -47,7 +52,7 @@ while True:
 
         fingers = handdetect.fingercheck()
 
-        if fingers[1] and fingers[2]:
+        if fingers[1] and fingers[2]: #нейтральное состояние
             xp, yp = 0, 0
 
             if 10 <= y2 <= 100:
@@ -73,10 +78,11 @@ while True:
                     drawingcolor = (80, 80, 230)
                 elif 1110 <= x2 <= 1240:
                     drawingcolor = (0, 0, 0)
+                    #смена цвета или переключение на стёрку
 
             cv2.rectangle(frame, (x1, y1 - 20), (x2, y2 + 20), drawingcolor, cv2.FILLED)
 
-        if fingers[1] and fingers[2] == False:
+        if fingers[1] and fingers[2] == False: #активное состояние
             cv2.circle(frame, (x1, y1), 15, drawingcolor, cv2.FILLED)
 
             if xp == 0 and yp == 0:
@@ -88,15 +94,16 @@ while True:
             else:
                 cv2.line(frame, (xp, yp), (x1, y1), drawingcolor, brushthickness)
                 cv2.line(canvasimg, (xp, yp), (x1, y1), drawingcolor, brushthickness)
-
+            #процесс рисования
             xp, yp = x1, y1
 
-    grayimg = cv2.cvtColor(canvasimg, cv2.COLOR_BGR2GRAY)
+    grayimg = cv2.cvtColor(canvasimg, cv2.COLOR_BGR2GRAY) # перевод картинки
     _, invimg = cv2.threshold(grayimg, 50, 255, cv2.THRESH_BINARY_INV)
     invimg = cv2.cvtColor(invimg, cv2.COLOR_GRAY2BGR)
 
     img = cv2.bitwise_and(frame, invimg)
     img = cv2.bitwise_or(img, canvasimg)
+    #накладываем наши рисунки поверх ихображения
 
     cv2.imshow('Virtual Painter', img)
 
