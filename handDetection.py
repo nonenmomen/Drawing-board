@@ -3,7 +3,7 @@ import mediapipe as mp
 import time
 
 
-class handDetector:
+class handDetector: #класс распознающий информацию о руках на изображении
     def __init__(self, static_mode=False, maxhands=2, model_complexity=1, detection_confident=0.5, tracking_confident=0.5):
         self.static_mode = static_mode
         self.maxhands = maxhands
@@ -17,13 +17,13 @@ class handDetector:
         self.mpdraw = mp.solutions.drawing_utils
         self.top_idx = [4, 8, 12, 16, 20]
 
-    def findhands(self, frame, draw_landmark=True):
+    def findhands(self, frame, draw_landmark=True): #детектор рук
 
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(img)
         return frame
 
-    def gethandlocation(self, frame, handNo=0, draw_landmark=True):
+    def gethandlocation(self, frame, handNo=0, draw_landmark=True): #распознавание местоположения ладони
         self.lmlist = []
         if self.results.multi_hand_landmarks:
             myhand = self.results.multi_hand_landmarks[handNo]
@@ -38,7 +38,7 @@ class handDetector:
 
         return self.lmlist
 
-    def fingercheck(self):
+    def fingercheck(self): #распознавание пальцев
         fingers = []
 
         if self.lmlist[self.top_idx[0]][1] > self.lmlist[self.top_idx[0] - 1][1]:
